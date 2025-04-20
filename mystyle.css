@@ -1,0 +1,25 @@
+#sidebar {
+  min-width: 250px;
+  max-width: 250px;
+}
+
+#wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
+#page-content {
+  overflow-y: auto;
+}
+
+#sidebar .nav-link {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+#sidebar .nav-link.active,
+#sidebar .nav-link:hover {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+}
