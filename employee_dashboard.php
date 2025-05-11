@@ -1,73 +1,9 @@
 <!-- index.php -->
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard</title>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-        rel="stylesheet">
-    <style>
-        body {
-            background: url('images/portalbgp.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
-        #sidebar {
-            min-width: 250px;
-            max-width: 250px;
-        }
-
-        #wrapper {
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #page-content {
-            overflow-y: auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #sidebar .nav-link {
-            transition: .3s;
-        }
-
-        #sidebar .nav-link.active,
-        #sidebar .nav-link:hover {
-            background-color: #0d6efd !important;
-            color: #fff !important;
-        }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: scale(1.02);
-        }
-    </style>
-</head>
-
-
 <?php
 require_once "connection.php";
 
-
-// run a SELECT * on each table then read ->num_rows
+// Run a SELECT * on each table to count records
 $res1 = $conn->query("SELECT * FROM resident");
 $count_residents = $res1->num_rows;
 
@@ -82,14 +18,43 @@ $count_incidents = $res4->num_rows;
 
 $res5 = $conn->query("SELECT * FROM infrastructure_projects");
 $count_projects = $res5->num_rows;
-
-$res6 = $conn->query("SELECT * FROM users");
-$count_users = $res1->num_rows;
-
-$res7 = $conn->query("SELECT * FROM lags");
-$count_lags = $res2->num_rows;
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employee Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+        }
+
+        #wrapper {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #page-content {
+            overflow-y: auto;
+        }
+
+        #sidebar .nav-link {
+            transition: .3s;
+        }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+        }
+    </style>
+</head>
 
 <body>
     <!-- Mobile top navbar -->
@@ -102,8 +67,8 @@ $count_lags = $res2->num_rows;
         </div>
     </nav>
 
-
     <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
                 <span class="fs-4">LOGO</span>
@@ -111,7 +76,7 @@ $count_lags = $res2->num_rows;
 
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="admin.php" class="nav-link text-white">
+                    <a href="employee_dashboard.php" class="nav-link text-white active">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
@@ -140,17 +105,6 @@ $count_lags = $res2->num_rows;
                         <i class="bi bi-building me-2"></i> Projects
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="users.php" class="nav-link text-white">
-                        <i class="bi bi-person me-2"></i> Users
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="lags.php" class="nav-link text-white">
-                        <i class="bi bi-journal-text me-2"></i> Lags
-                    </a>
-                </li>
-
             </ul>
             <div class="mt-auto">
                 <a href="logout.php" class="btn btn-primary w-100">
@@ -159,11 +113,12 @@ $count_lags = $res2->num_rows;
             </div>
         </nav>
 
-        <div class="flex-grow-1" id="page-content">
+        <!-- Page Content -->
+        <div class="flex-grow-1 bg-light" id="page-content">
             <div class="container py-5">
                 <h1 class="mb-1">Barangay Camaya</h1>
                 <p class="text-secondary mb-4">
-                    Welcome, Admin! Use the cards below to jump straight to each section.
+                    Welcome, Employee! Use the cards below to jump straight to each section.
                 </p>
 
                 <div class="row g-4">
@@ -236,43 +191,12 @@ $count_lags = $res2->num_rows;
                             </div>
                         </a>
                     </div>
-
-                    <div class="col-sm-6 col-lg-4">
-                        <a href="users.php" class="text-decoration-none">
-                            <div class="card shadow-sm">
-                                <div class="card-body d-flex align-items-center">
-                                    <i class="bi bi-person-fill fs-1 text-info me-3"></i>
-                                    <div>
-                                        <h5 class="card-title mb-0">Users</h5>
-                                        <p class="fs-4 mb-0"><?= $count_users ?></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-sm-6 col-lg-4">
-                        <a href="lags.php" class="text-decoration-none">
-                            <div class="card shadow-sm">
-                                <div class="card-body d-flex align-items-center">
-                                    <i class="bi bi-journal-text fs-1 text-info me-3"></i>
-                                    <div>
-                                        <h5 class="card-title mb-0">Lags</h5>
-                                        <p class="fs-4 mb-0"><?= $count_lags ?></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
                 </div>
             </div>
         </div>
     </div>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('btn-toggle')
             .addEventListener('click', () =>
@@ -283,11 +207,5 @@ $count_lags = $res2->num_rows;
         });
     </script>
 </body>
-
-
-
-
-
-
 
 </html>

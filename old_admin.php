@@ -14,14 +14,6 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
         rel="stylesheet">
     <style>
-        body {
-            background: url('images/portalbgp.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
         #sidebar {
             min-width: 250px;
             max-width: 250px;
@@ -34,10 +26,6 @@
 
         #page-content {
             overflow-y: auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         #sidebar .nav-link {
@@ -49,49 +37,37 @@
             background-color: #0d6efd !important;
             color: #fff !important;
         }
-
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: scale(1.02);
-        }
     </style>
 </head>
 
-
-<?php
-require_once "connection.php";
-
-
-// run a SELECT * on each table then read ->num_rows
-$res1 = $conn->query("SELECT * FROM resident");
-$count_residents = $res1->num_rows;
-
-$res2 = $conn->query("SELECT * FROM household");
-$count_households = $res2->num_rows;
-
-$res3 = $conn->query("SELECT * FROM barangay_official");
-$count_officials = $res3->num_rows;
-
-$res4 = $conn->query("SELECT * FROM incident_report");
-$count_incidents = $res4->num_rows;
-
-$res5 = $conn->query("SELECT * FROM infrastructure_projects");
-$count_projects = $res5->num_rows;
-
-$res6 = $conn->query("SELECT * FROM users");
-$count_users = $res1->num_rows;
-
-$res7 = $conn->query("SELECT * FROM lags");
-$count_lags = $res2->num_rows;
-?>
-
-
 <body>
+
+    <?php
+    require_once "connection.php";
+
+    // run a SELECT * on each table then read ->num_rows
+    $res1 = $conn->query("SELECT * FROM resident");
+    $count_residents = $res1->num_rows;
+
+    $res2 = $conn->query("SELECT * FROM household");
+    $count_households = $res2->num_rows;
+
+    $res3 = $conn->query("SELECT * FROM barangay_official");
+    $count_officials = $res3->num_rows;
+
+    $res4 = $conn->query("SELECT * FROM incident_report");
+    $count_incidents = $res4->num_rows;
+
+    $res5 = $conn->query("SELECT * FROM infrastructure_projects");
+    $count_projects = $res5->num_rows;
+
+    $res6 = $conn->query("SELECT * FROM users");
+    $count_users = $res1->num_rows;
+
+    $res7 = $conn->query("SELECT * FROM logs");
+    $count_logs = $res2->num_rows;
+    ?>
+
     <!-- Mobile top navbar -->
     <nav class="navbar navbar-dark bg-dark d-md-none">
         <div class="container-fluid">
@@ -146,20 +122,25 @@ $count_lags = $res2->num_rows;
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="lags.php" class="nav-link text-white">
-                        <i class="bi bi-journal-text me-2"></i> Lags
+                    <a href="logs.php" class="nav-link text-white">
+                        <i class="bi bi-journal-text me-2"></i> Logs
                     </a>
                 </li>
 
             </ul>
             <div class="mt-auto">
-                <a href="logout.php" class="btn btn-primary w-100">
-                    <i class="bi bi-box-arrow-right me-1"></i> LOGOUT
-                </a>
+                <button class="btn btn-primary w-100">
+                    <a href="logout.php" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-right me-1"></i> LOGOUT
+                    </a>
+                </button>
+
+
+
             </div>
         </nav>
 
-        <div class="flex-grow-1" id="page-content">
+        <div class="flex-grow-1 bg-light" id="page-content">
             <div class="container py-5">
                 <h1 class="mb-1">Barangay Camaya</h1>
                 <p class="text-secondary mb-4">
@@ -252,13 +233,13 @@ $count_lags = $res2->num_rows;
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <a href="lags.php" class="text-decoration-none">
+                        <a href="logs.php" class="text-decoration-none">
                             <div class="card shadow-sm">
                                 <div class="card-body d-flex align-items-center">
                                     <i class="bi bi-journal-text fs-1 text-info me-3"></i>
                                     <div>
-                                        <h5 class="card-title mb-0">Lags</h5>
-                                        <p class="fs-4 mb-0"><?= $count_lags ?></p>
+                                        <h5 class="card-title mb-0">Logs</h5>
+                                        <p class="fs-4 mb-0"><?= $count_logs ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -278,16 +259,11 @@ $count_lags = $res2->num_rows;
             .addEventListener('click', () =>
                 document.getElementById('sidebar').classList.toggle('d-none')
             );
+
         document.querySelectorAll('#sidebar .nav-link').forEach(link => {
             if (link.href === window.location.href) link.classList.add('active');
         });
     </script>
 </body>
-
-
-
-
-
-
 
 </html>
