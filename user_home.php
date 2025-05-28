@@ -74,10 +74,39 @@ function getRandomPastelColor()
     <link rel="stylesheet" href="mystyle.css">
     <style>
         body {
-            background: url('images/portalbgp.jpg') no-repeat center center fixed;
-            background-size: cover;
+            position: relative;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .btn-secondary,
+        .btn-secondary:focus,
+        .btn-secondary:active {
+            background-color: #092922 !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            background-color: #1abc9c !important;
+            color: #fff !important;
         }
 
         .card {
@@ -88,21 +117,6 @@ function getRandomPastelColor()
 
         .card:hover {
             transform: scale(1.02);
-        }
-
-        .section-title {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .card-text {
-            color: #555;
         }
 
         #page-content {

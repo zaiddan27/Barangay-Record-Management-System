@@ -77,6 +77,61 @@ $result = $conn->query($selectsql);
     <link rel="stylesheet" href="mystyle.css">
 </head>
 
+<style>
+    body {
+        position: relative;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    #sidebar {
+        min-width: 250px;
+        max-width: 250px;
+        background: rgba(9, 41, 34, 0.95) !important;
+    }
+
+    .btn-primary,
+    .btn-primary:focus,
+    .btn-primary:active {
+        background-color: #1abc9c !important;
+        border: none !important;
+    }
+
+    .btn-secondary,
+    .btn-secondary:focus,
+    .btn-secondary:active {
+        background-color: #092922 !important;
+        border: none !important;
+        color: #fff !important;
+    }
+
+    #sidebar .nav-link.active,
+    #sidebar .nav-link:hover {
+        background-color: #1abc9c !important;
+        color: #fff !important;
+    }
+
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+    }
+
+    #page-content {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
 <body>
     <!-- Mobile top navbar -->
     <nav class="navbar navbar-dark bg-dark d-md-none">
@@ -92,7 +147,7 @@ $result = $conn->query($selectsql);
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
@@ -210,9 +265,10 @@ $result = $conn->query($selectsql);
                                                     class="btn btn-warning btn-sm"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editModal"
-                                                    onclick="populateModal(<?= json_encode($row) ?>)">
+                                                    onclick='populateModal(this)'>
                                                     Edit
                                                 </button>
+                                                <input type="hidden" class="official-data" value='<?= htmlspecialchars(json_encode($row), ENT_QUOTES, "UTF-8") ?>'>
                                             </td>
                                         <?php endif; ?>
                                     </tr>
@@ -277,12 +333,15 @@ $result = $conn->query($selectsql);
 
                 <script>
                     // Populate modal with current record data
-                    function populateModal(data) {
-                        // Assign values to modal fields
-                        document.getElementById('modal-official-id').value = data.official_id;
-                        document.getElementById('modal-official-name').value = data.official_name;
-                        document.getElementById('modal-position').value = data.position;
-                        document.getElementById('modal-contact-information').value = data.contact_information;
+                    function populateModal(btn) {
+                        // Get the hidden input next to the button
+                        var data = btn.parentNode.querySelector('.official-data').value;
+                        var official = JSON.parse(data);
+
+                        document.getElementById('modal-official-id').value = official.official_id;
+                        document.getElementById('modal-official-name').value = official.official_name;
+                        document.getElementById('modal-position').value = official.position;
+                        document.getElementById('modal-contact-information').value = official.contact_information;
                     }
                 </script>
 
@@ -339,6 +398,16 @@ $result = $conn->query($selectsql);
             if (link.href === window.location.href) link.classList.add('active');
         });
     </script>
+
+    <!-- search clear full list again functionality  -->
+    <script>
+        document.querySelector('input[name="searchInput03"]').addEventListener('input', function() {
+            if (this.value === '') {
+                this.form.submit();
+            }
+        });
+    </script>
+
 </body>
 
 </html>

@@ -1,7 +1,18 @@
 <!-- index.php -->
 
 <?php
+session_start();
 require_once "connection.php";
+
+if (empty($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'employee')) {
+    header('Location: login.php');
+    exit;
+}
+
+if ($_SESSION['role'] === 'admin') {
+    header("Location: admin.php");
+    exit();
+}
 
 // Run a SELECT * on each table to count records
 $res1 = $conn->query("SELECT * FROM resident");
@@ -29,29 +40,73 @@ $count_projects = $res5->num_rows;
     <title>Employee Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="mystyle.css">
     <style>
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Retain sidebar background */
         #sidebar {
             min-width: 250px;
             max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
         }
 
-        #wrapper {
-            height: 100vh;
-            overflow: hidden;
+        /* Portal theme colors */
+        .navbar-custom {
+            background-color: #092922 !important;
+            padding: 1.5rem 0;
         }
 
-        #page-content {
-            overflow-y: auto;
-        }
-
-        #sidebar .nav-link {
-            transition: .3s;
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            letter-spacing: 1px;
         }
 
         #sidebar .nav-link.active,
         #sidebar .nav-link:hover {
-            background-color: #0d6efd !important;
+            background-color: #1abc9c !important;
             color: #fff !important;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .footer {
+            background-color: #092922;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 0.9rem;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            padding: 1rem 0;
+            margin: 0;
+            z-index: 1030;
         }
     </style>
 </head>
@@ -71,12 +126,12 @@ $count_projects = $res5->num_rows;
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="employee_dashboard.php" class="nav-link text-white active">
+                    <a href="<?= ($_SESSION['role'] === 'admin') ? 'admin.php' : 'employee_dashboard.php'; ?>" class="nav-link text-white active">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>

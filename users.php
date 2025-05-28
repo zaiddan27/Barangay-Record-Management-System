@@ -84,6 +84,20 @@ if (isset($_POST['edit_user'])) {
     }
 }
 
+if (isset($_POST['user_id']) && isset($_POST['current_status'])) {
+    $user_id = (int)$_POST['user_id'];
+    $current_status = $_POST['current_status'];
+    // Toggle status: if currently Active, set to Inactive; else set to Active
+    $new_status = ($current_status === 'Active') ? 'Inactive' : 'Active';
+    $update_sql = "UPDATE user SET status = '$new_status' WHERE user_id = $user_id";
+    if ($conn->query($update_sql)) {
+        echo "<div class='alert alert-success mt-3'>Account status updated successfully.</div>";
+    } else {
+        echo "<div class='alert alert-danger mt-3'>Error updating status: " . $conn->error . "</div>";
+    }
+    exit; // Important for AJAX
+}
+
 $result = $conn->query($selectsql);
 
 if (!$result) {
@@ -101,6 +115,88 @@ if (!$result) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <style>
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .btn-secondary,
+        .btn-secondary:focus,
+        .btn-secondary:active {
+            background-color: #092922 !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            background-color: #1abc9c !important;
+            color: #fff !important;
+        }
+
+        /* Switch styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+            vertical-align: middle;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #1abc9c;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+    </style>
 </head>
 
 <body>
@@ -117,7 +213,7 @@ if (!$result) {
     <div class="d-flex" id="wrapper">
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
@@ -197,6 +293,7 @@ if (!$result) {
                                 <th>Username</th>
                                 <th>Password</th>
                                 <th>Email</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -211,6 +308,16 @@ if (!$result) {
                                         <td><?= htmlspecialchars($row['password']) ?></td>
                                         <td><?= htmlspecialchars($row['email']) ?></td>
                                         <td>
+                                            <label class="switch">
+                                                <input type="checkbox" class="status-toggle"
+                                                    data-user-id="<?= $row['user_id'] ?>"
+                                                    data-current-status="<?= $row['status'] ?>"
+                                                    <?= ($row['status'] === 'Active') ? 'checked' : '' ?>>
+                                                <span class="slider"></span>
+                                            </label>
+                                            <span class="ms-2"><?= htmlspecialchars($row['status'] ?? 'Pending') ?></span>
+                                        </td>
+                                        <td>
                                             <button
                                                 class="btn btn-warning btn-sm"
                                                 data-bs-toggle="modal"
@@ -223,7 +330,7 @@ if (!$result) {
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">No records found</td>
+                                    <td colspan="8" class="text-center py-4">No records found</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -314,6 +421,7 @@ if (!$result) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- for nav -->
     <script>
@@ -333,7 +441,66 @@ if (!$result) {
             document.getElementById('modal-password').value = ''; // Leave password blank
             document.getElementById('modal-email').value = data.email;
         }
+
+        // Toggle user status
+        function toggleStatus(userId, currentStatus) {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('current_status', currentStatus);
+
+            fetch('users.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    // Refresh the page to see the changes
+                    location.reload();
+                })
+                .catch(error => console.error('Error:', error));
+        }
     </script>
+
+    <!-- search clear full list again functionality  -->
+    <script>
+        document.querySelector('input[name="searchInput10"]').addEventListener('input', function() {
+            if (this.value === '') {
+                this.form.submit();
+            }
+        });
+    </script>
+
+    <script>
+        document.querySelectorAll('.status-toggle').forEach(function(toggle) {
+            // Set initial color for Pending/NULL
+            if (toggle.dataset.currentStatus !== 'Active') {
+                toggle.checked = false;
+            }
+            toggle.addEventListener('change', function() {
+                const userId = this.getAttribute('data-user-id');
+                const currentStatus = this.getAttribute('data-current-status');
+                fetch('', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `user_id=${userId}&current_status=${currentStatus}`
+                    })
+                    .then(response => response.text())
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Status Updated!',
+                            text: 'Account status updated successfully.',
+                            confirmButtonColor: '#1abc9c'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

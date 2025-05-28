@@ -20,12 +20,25 @@ if (isset($_POST['edit_project'])) {
     $end_date = $_POST['end_date'];
     $project_status = $_POST['project_status'];
 
+    // Handle image upload for edit
+    $img_path_sql = "";
+    if (isset($_FILES['edit_img_path']) && $_FILES['edit_img_path']['error'] == 0) {
+        $target_dir = "images/projects/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $img_path = $target_dir . basename($_FILES["edit_img_path"]["name"]);
+        move_uploaded_file($_FILES["edit_img_path"]["tmp_name"], $img_path);
+        $img_path_sql = ", img_path = '$img_path'";
+    }
+
     $updateSql = "UPDATE infrastructure_projects 
                   SET project_name = '$project_name', 
                       project_description = '$project_description', 
                       start_date = '$start_date', 
                       end_date = '$end_date', 
-                      project_status = '$project_status' 
+                      project_status = '$project_status'
+                      $img_path_sql
                   WHERE project_id = $project_id";
 
     if ($conn->query($updateSql)) {
@@ -44,8 +57,19 @@ if (isset($_POST['add_project'])) {
     $end_date = $_POST['end_date'];
     $project_status = $_POST['project_status'];
 
-    $insertSql = "INSERT INTO infrastructure_projects (project_name, project_description, start_date, end_date, project_status) 
-                  VALUES ('$project_name', '$project_description', '$start_date', '$end_date', '$project_status')";
+    // Handle image upload
+    $img_path = '';
+    if (isset($_FILES['img_path']) && $_FILES['img_path']['error'] == 0) {
+        $target_dir = "images/projects/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        $img_path = $target_dir . basename($_FILES["img_path"]["name"]);
+        move_uploaded_file($_FILES["img_path"]["tmp_name"], $img_path);
+    }
+
+    $insertSql = "INSERT INTO infrastructure_projects (project_name, project_description, start_date, end_date, project_status, img_path) 
+                  VALUES ('$project_name', '$project_description', '$start_date', '$end_date', '$project_status', '$img_path')";
 
     if ($conn->query($insertSql)) {
         $msg = '<div class="alert alert-success">Project added successfully.</div>';
@@ -53,6 +77,15 @@ if (isset($_POST['add_project'])) {
     } else {
         $msg = '<div class="alert alert-danger">Failed to add project: ' . $conn->error . '</div>';
     }
+}
+
+// Handle delete functionality
+if (isset($_POST['delete_project'])) {
+    $project_id = (int)$_POST['project_id'];
+    // Optionally, delete the image file from the server here if you want
+    $conn->query("DELETE FROM infrastructure_projects WHERE project_id = $project_id");
+    $msg = '<div class="alert alert-success">Project deleted successfully.</div>';
+    $conn->query("INSERT INTO lag (user_id, action) VALUES ({$_SESSION['user_id']}, 'Deleted project ID: $project_id')");
 }
 
 // Fetch projects
@@ -85,6 +118,43 @@ $result = $conn->query($selectsql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="mystyle.css">
+    <style>
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .btn-secondary,
+        .btn-secondary:focus,
+        .btn-secondary:active {
+            background-color: #092922 !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            background-color: #1abc9c !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -102,7 +172,7 @@ $result = $conn->query($selectsql);
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
@@ -190,6 +260,7 @@ $result = $conn->query($selectsql);
                                 <th>Start Date</th>
                                 <th>End Date</th>
                                 <th>Project Status</th>
+                                <th>Image</th>
                                 <?php if ($userRole === 'admin' || $userRole === 'employee'): ?>
                                     <th>Actions</th>
                                 <?php endif; ?>
@@ -205,6 +276,13 @@ $result = $conn->query($selectsql);
                                         <td><?= date('Y-m-d', strtotime($row['start_date'])) ?></td>
                                         <td><?= date('Y-m-d', strtotime($row['end_date'])) ?></td>
                                         <td><?= htmlspecialchars($row['project_status']) ?></td>
+                                        <td>
+                                            <?php if (!empty($row['img_path'])): ?>
+                                                <img src="<?= htmlspecialchars($row['img_path']) ?>" width="80" height="60" style="object-fit:cover;">
+                                            <?php else: ?>
+                                                <span class="text-muted">No image</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <?php if ($userRole === 'admin' || $userRole === 'employee'): ?>
                                             <td>
                                                 <button
@@ -220,7 +298,7 @@ $result = $conn->query($selectsql);
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" class="text-center">No records found</td>
+                                    <td colspan="8" class="text-center">No records found</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -229,7 +307,7 @@ $result = $conn->query($selectsql);
 
                 <?php if ($userRole === 'admin' || $userRole === 'employee'): ?>
                     <h2 class="h5 mt-4">Add New Project</h2>
-                    <form action="projects.php" method="post" class="row g-3">
+                    <form action="projects.php" method="post" class="row g-3" enctype="multipart/form-data">
                         <div class="col-md-6">
                             <input type="text" name="project_name" class="form-control" placeholder="Project Name" required>
                         </div>
@@ -252,6 +330,10 @@ $result = $conn->query($selectsql);
                                 <option value="Completed">Completed</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+                            <label for="img_path" class="form-label">Project Image</label>
+                            <input type="file" name="img_path" id="img_path" class="form-control" accept="image/*">
+                        </div>
                         <div class="col-12">
                             <button type="submit" name="add_project" class="btn btn-primary">Add Project</button>
                             <a href="admin.php" class="btn btn-secondary">
@@ -268,7 +350,7 @@ $result = $conn->query($selectsql);
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="projects.php" method="post">
+                <form action="projects.php" method="post" enctype="multipart/form-data" id="editProjectForm">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">Edit Project</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -299,17 +381,32 @@ $result = $conn->query($selectsql);
                                 <option value="Completed">Completed</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="modal-edit-img-path" class="form-label">Change Project Image</label>
+                            <input type="file" name="edit_img_path" id="modal-edit-img-path" class="form-control" accept="image/*">
+                            <div class="mt-2">
+                                <img id="modal-current-img" src="" alt="Current Image" style="max-width:100px; max-height:80px; object-fit:cover;">
+                            </div>
+                            <small class="text-muted">Leave blank to keep current image.</small>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" name="edit_project" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-danger" id="deleteProjectBtn">Delete</button>
                     </div>
+                </form>
+                <!-- Hidden form for delete -->
+                <form action="projects.php" method="post" id="deleteProjectForm" style="display:none;">
+                    <input type="hidden" name="project_id" id="delete-project-id">
+                    <input type="hidden" name="delete_project" value="1">
                 </form>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- for nav -->
     <script>
@@ -331,7 +428,7 @@ $result = $conn->query($selectsql);
     </script>
 
     <script>
-        // Populate modal with current record data
+        // Populate modal with current record data, including image
         function populateModal(data) {
             document.getElementById('modal-project-id').value = data.project_id;
             document.getElementById('modal-project-name').value = data.project_name;
@@ -339,7 +436,35 @@ $result = $conn->query($selectsql);
             document.getElementById('modal-start-date').value = data.start_date;
             document.getElementById('modal-end-date').value = data.end_date;
             document.getElementById('modal-project-status').value = data.project_status;
+            document.getElementById('modal-current-img').src = data.img_path ? data.img_path : '';
+            document.getElementById('delete-project-id').value = data.project_id;
         }
+
+        // SweetAlert for delete confirmation
+        document.getElementById('deleteProjectBtn').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will permanently delete the project.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteProjectForm').submit();
+                }
+            });
+        });
+    </script>
+
+    <!-- search clear full list again functionality  -->
+    <script>
+        document.querySelector('input[name="searchInput01"]').addEventListener('input', function() {
+            if (this.value === '') {
+                this.form.submit();
+            }
+        });
     </script>
 </body>
 

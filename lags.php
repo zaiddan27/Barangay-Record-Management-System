@@ -46,14 +46,16 @@ if (isset($_POST['delete_log_id'])) {
 }
 
 // Handle search functionality
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$searchInput05 = $_POST['searchInput05'] ?? '';
 
-// Fetch logs data with search and join
 $logsQuery = "
     SELECT l.lag_id, u.fullname AS user_name, l.action, l.DateTime
     FROM lag l
     JOIN user u ON l.user_id = u.user_id
-    WHERE u.fullname LIKE '%$search%' OR l.action LIKE '%$search%'
+    WHERE (l.lag_id LIKE '%$searchInput05%'
+        OR u.fullname LIKE '%$searchInput05%'
+        OR l.action LIKE '%$searchInput05%'
+        OR l.DateTime LIKE '%$searchInput05%')
     ORDER BY l.DateTime DESC
     LIMIT 100
 ";
@@ -73,28 +75,41 @@ if (!$logsResult) {
     <title>Logs</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="mystyle.css">
     <style>
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
         #sidebar {
             min-width: 250px;
             max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
         }
 
-        #wrapper {
-            height: 100vh;
-            overflow: hidden;
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
         }
 
-        #page-content {
-            overflow-y: auto;
-        }
-
-        #sidebar .nav-link {
-            transition: .3s;
+        .btn-secondary,
+        .btn-secondary:focus,
+        .btn-secondary:active {
+            background-color: #092922 !important;
+            border: none !important;
+            color: #fff !important;
         }
 
         #sidebar .nav-link.active,
         #sidebar .nav-link:hover {
-            background-color: #0d6efd !important;
+            background-color: #1abc9c !important;
             color: #fff !important;
         }
     </style>
@@ -107,7 +122,7 @@ if (!$logsResult) {
             <button class="btn btn-dark" id="btn-toggle">
                 <i class="bi bi-list fs-3"></i>
             </button>
-            <span class="navbar-brand mb-0 ms-2">Barangay Camaya</span>
+            <span class="navbar-brand mb-0 ms-2">LOGO</span>
         </div>
     </nav>
 
@@ -115,7 +130,7 @@ if (!$logsResult) {
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">Barangay Camaya</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
@@ -176,7 +191,7 @@ if (!$logsResult) {
                 <?= $msg ?>
 
                 <!-- Clear Logs Button -->
-                <form method="post" onsubmit="return confirm('Are you sure you want to clear all logs?');">
+                <form id="clearLogsForm" method="post">
                     <button type="submit" name="clear_logs" class="btn btn-danger mb-3">
                         <i class="bi bi-trash"></i> Clear Logs
                     </button>
@@ -184,9 +199,9 @@ if (!$logsResult) {
 
                 <!-- Add and Search -->
                 <div class="d-flex justify-content-between mb-3">
-                    <form class="d-flex" method="get">
-                        <input class="form-control me-2" type="search" name="search" placeholder="Search logs" value="<?= $search ?>">
-                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                    <form class="d-flex" method="post">
+                        <input class="form-control me-2" type="search" name="searchInput05" placeholder="Search logs" value="<?= htmlspecialchars($searchInput05 ?? '') ?>">
+                        <button class="btn btn-primary" type="submit">Search</button>
                     </form>
                 </div>
 
@@ -244,20 +259,52 @@ if (!$logsResult) {
             if (link.href === window.location.href) link.classList.add('active');
         });
 
+        // SweetAlert for Delete All Logs
+        document.getElementById('clearLogsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure you want to clear all logs?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1abc9c',
+                cancelButtonColor: '#092922',
+                confirmButtonText: 'Yes, clear all!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Use fetch to mimic the individual delete
+                    fetch('', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'clear_logs=1'
+                        })
+                        .then(response => response.text())
+                        .then(data => {
+                            Swal.fire('Cleared!', 'All logs have been cleared.', 'success').then(() => {
+                                location.reload();
+                            });
+                        })
+                        .catch(error => {
+                            Swal.fire('Error!', 'Failed to clear all logs.', 'error');
+                        });
+                }
+            });
+        });
 
-
-
+        // SweetAlert for individual log delete (existing)
         document.querySelectorAll('.delete-log-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const logId = this.getAttribute('data-log-id');
-
                 Swal.fire({
                     title: 'Are you sure you want to delete this log?',
                     text: "This action cannot be undone!",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
+                    confirmButtonColor: '#1abc9c',
+                    cancelButtonColor: '#092922',
                     confirmButtonText: 'Yes, delete it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {

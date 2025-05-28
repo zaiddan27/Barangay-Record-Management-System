@@ -13,40 +13,40 @@
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
         rel="stylesheet">
+    <link rel="stylesheet" href="mystyle.css">
     <style>
         body {
-            background: url('images/portalbgp.jpg') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
+            position: relative;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
 
+        /* Retain sidebar background */
         #sidebar {
             min-width: 250px;
             max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
         }
 
-        #wrapper {
-            height: 100vh;
-            overflow: hidden;
+        /* Portal theme colors */
+        .navbar-custom {
+            background-color: #092922 !important;
+            padding: 1.5rem 0;
         }
 
-        #page-content {
-            overflow-y: auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #sidebar .nav-link {
-            transition: .3s;
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            letter-spacing: 1px;
         }
 
         #sidebar .nav-link.active,
         #sidebar .nav-link:hover {
-            background-color: #0d6efd !important;
+            background-color: #1abc9c !important;
             color: #fff !important;
         }
 
@@ -57,15 +57,52 @@
         }
 
         .card:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .footer {
+            background-color: #092922;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 0.9rem;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            padding: 1rem 0;
+            margin: 0;
+            z-index: 1030;
         }
     </style>
 </head>
 
 
 <?php
+session_start();
 require_once "connection.php";
 
+if (empty($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'employee')) {
+    header('Location: login.php');
+    exit;
+}
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'employee') {
+        header("Location: employee_dashboard.php");
+        exit();
+    } else {
+        header("Location: login.php");
+        exit();
+    }
+}
 
 // run a SELECT * on each table then read ->num_rows
 $res1 = $conn->query("SELECT * FROM resident");
@@ -102,16 +139,15 @@ $count_lags = $res2->num_rows;
         </div>
     </nav>
 
-
     <div class="d-flex" id="wrapper">
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="admin.php" class="nav-link text-white">
+                    <a href="<?= ($_SESSION['role'] === 'admin') ? 'admin.php' : 'employee_dashboard.php'; ?>" class="nav-link text-white">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
                 </li>
@@ -147,7 +183,7 @@ $count_lags = $res2->num_rows;
                 </li>
                 <li class="nav-item">
                     <a href="lags.php" class="nav-link text-white">
-                        <i class="bi bi-journal-text me-2"></i> Lags
+                        <i class="bi bi-journal-text me-2"></i> Logs
                     </a>
                 </li>
 

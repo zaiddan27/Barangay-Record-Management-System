@@ -89,6 +89,43 @@ if (!$result) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="mystyle.css">
+    <style>
+        body {
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('images/portalbgp.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: rgba(9, 41, 34, 0.95) !important;
+        }
+
+        .btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active {
+            background-color: #1abc9c !important;
+            border: none !important;
+        }
+
+        .btn-secondary,
+        .btn-secondary:focus,
+        .btn-secondary:active {
+            background-color: #092922 !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            background-color: #1abc9c !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -106,7 +143,7 @@ if (!$result) {
         <!-- Sidebar -->
         <nav id="sidebar" class="bg-dark text-white d-flex flex-column p-3">
             <div class="d-flex align-items-center mb-4">
-                <span class="fs-4">LOGO</span>
+                <span class="fs-4">CAMAYA</span>
             </div>
 
             <ul class="nav nav-pills flex-column mb-auto">
@@ -355,6 +392,16 @@ if (!$result) {
             document.getElementById('modal-address').value = data.address;
             document.getElementById('modal-user-id').value = data.user_id || '';
         }
+    </script>
+
+
+    <!-- search clear full list again functionality  -->
+    <script>
+        document.querySelector('input[name="searchInput"]').addEventListener('input', function() {
+            if (this.value === '') {
+                this.form.submit();
+            }
+        });
     </script>
 </body>
 
